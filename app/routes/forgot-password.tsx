@@ -23,7 +23,7 @@ export async function action({ request }: { request: Request }) {
   }
 
   const origin = new URL(request.url).origin;
-  const redirectUrl = `${origin}/reset-password`;
+  const redirectUrl = `${origin}/auth/confirm?next=/reset-password`;
 
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {

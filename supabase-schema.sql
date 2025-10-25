@@ -15,7 +15,7 @@ CREATE POLICY "Users can view own profile" ON profiles
   FOR SELECT USING (auth.uid() = id);
 
 CREATE POLICY "Anyone can check username availability" ON profiles
-  FOR SELECT TO anon
+  FOR SELECT
   USING (true);
 
 CREATE POLICY "Users can update own profile" ON profiles

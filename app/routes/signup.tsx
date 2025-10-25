@@ -13,7 +13,7 @@ import {
 } from "~/components/ui/card";
 import { supabase } from "~/lib/supabase";
 import { toast } from "sonner";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
@@ -51,6 +51,7 @@ export async function action({ request }: Route.ActionArgs) {
         data: {
           username: username.trim(),
         },
+        emailRedirectTo: `${new URL(request.url).origin}/auth/confirm`,
       },
     });
 
@@ -58,21 +59,9 @@ export async function action({ request }: Route.ActionArgs) {
       throw error;
     }
 
-    if (data.user) {
-      const { error: profileError } = await supabase.from("profiles").insert({
-        id: data.user.id,
-        username: username.trim(),
-        email: email.trim(),
-      });
-
-      if (profileError) {
-        console.error("Profile creation error:", profileError);
-      }
-    }
-
     return {
       success: true,
-      message: "Account created successfully! You can now log in.",
+      message: "Account created successfully! Please check your email to verify your account.",
     };
   } catch (error) {
     console.error("Signup error:", error);
@@ -92,12 +81,16 @@ export default function Signup() {
   >(null);
   const [usernameCheckTimeout, setUsernameCheckTimeout] =
     useState<NodeJS.Timeout | null>(null);
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
 
   const checkUsernameAvailability = async (usernameToCheck: string) => {
     if (!usernameToCheck.trim()) {
       setIsUsernameAvailable(null);
+      setIsCheckingUsername(false);
       return;
     }
+
+    setIsCheckingUsername(true);
 
     try {
       const { data, error } = await supabase
@@ -109,13 +102,22 @@ export default function Signup() {
       if (error && error.code !== "PGRST116") {
         console.error("Username check error:", error);
         setIsUsernameAvailable(null);
+        setIsCheckingUsername(false);
         return;
       }
 
-      setIsUsernameAvailable(!data);
+      // Only update state if this is still the current username being checked
+      setUsername(currentUsername => {
+        if (currentUsername.trim() === usernameToCheck.trim()) {
+          setIsUsernameAvailable(!data);
+          setIsCheckingUsername(false);
+        }
+        return currentUsername;
+      });
     } catch (error) {
       console.error("Username check error:", error);
       setIsUsernameAvailable(null);
+      setIsCheckingUsername(false);
     }
   };
 
@@ -125,6 +127,16 @@ export default function Signup() {
     if (usernameCheckTimeout) {
       clearTimeout(usernameCheckTimeout);
     }
+
+    // Clear previous state immediately when user starts typing
+    if (!value.trim()) {
+      setIsUsernameAvailable(null);
+      setIsCheckingUsername(false);
+      setUsernameCheckTimeout(null);
+      return;
+    }
+
+    setIsCheckingUsername(true);
 
     const timeout = setTimeout(() => {
       checkUsernameAvailability(value);
@@ -172,14 +184,20 @@ export default function Signup() {
                   value={username}
                   onChange={(e) => handleUsernameChange(e.target.value)}
                   className={
-                    isUsernameAvailable === false
+                    isCheckingUsername
+                      ? "border-muted-foreground/50"
+                      : isUsernameAvailable === false
                       ? "border-destructive"
                       : isUsernameAvailable === true
                       ? "border-green-500"
                       : ""
                   }
                 />
-                {isUsernameAvailable !== null && (
+                {isCheckingUsername ? (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                  </div>
+                ) : isUsernameAvailable !== null ? (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
                     {isUsernameAvailable ? (
                       <CheckCircle className="w-4 h-4 text-green-500" />
@@ -187,14 +205,19 @@ export default function Signup() {
                       <XCircle className="w-4 h-4 text-destructive" />
                     )}
                   </div>
-                )}
+                ) : null}
               </div>
-              {isUsernameAvailable === false && (
+              {isCheckingUsername && username.trim() && (
+                <p className="text-sm text-muted-foreground">
+                  Checking availability...
+                </p>
+              )}
+              {isUsernameAvailable === false && !isCheckingUsername && (
                 <p className="text-sm text-destructive">
                   Username is already taken
                 </p>
               )}
-              {isUsernameAvailable === true && (
+              {isUsernameAvailable === true && !isCheckingUsername && (
                 <p className="text-sm text-green-600">Username is available</p>
               )}
             </div>
