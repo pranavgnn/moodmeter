@@ -71,7 +71,18 @@ Create a `.env` file in the root directory and add the following environment var
 ```env
 VITE_JWT_SECRET=e51f3c1f9ace48c218d2633ff70377a5a18b793799dae1cfa1499b0829f7dbd0
 VITE_GOOGLE_API_KEY=your_google_gemini_api_key_here
+VITE_PUBLIC_SUPABASE_URL=https://dqutalvojzgkllpxkrks.supabase.co
+VITE_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxdXRhbHZvanpna2xscHhrcmtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0MTMwNTAsImV4cCI6MjA3Njk4OTA1MH0.sMn0di_d77hdnXWgv-wo7Ga44wTxdHixh-K2gzyN5rs
 ```
+
+**Important:** Replace the JWT secret with your own randomly generated 32-byte string for security.
+
+### Database Setup
+
+1. Create a new project on [Supabase](https://supabase.com)
+2. Go to your project's SQL Editor
+3. Run the SQL script from `supabase-schema.sql` to create the required tables and policies
+4. Copy your project's URL and anon key to the environment variables above
 
 **Important:** Replace the JWT secret with your own randomly generated 32-byte string for security.
 

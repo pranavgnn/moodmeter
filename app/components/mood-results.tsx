@@ -35,16 +35,15 @@ export function MoodResults({ analysis }: MoodResultsProps) {
     },
   };
 
-  // Prepare data for charts with softer colors
   const colors = [
-    "#8B5CF6", // Purple
-    "#06B6D4", // Cyan
-    "#10B981", // Emerald
-    "#F59E0B", // Amber
-    "#EF4444", // Red
-    "#EC4899", // Pink
-    "#6366F1", // Indigo
-    "#14B8A6", // Teal
+    "#8B5CF6",
+    "#06B6D4",
+    "#10B981",
+    "#F59E0B",
+    "#EF4444",
+    "#EC4899",
+    "#6366F1",
+    "#14B8A6",
   ];
 
   const barData = analysis.moods.map((mood, index) => ({
@@ -61,7 +60,6 @@ export function MoodResults({ analysis }: MoodResultsProps) {
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Header */}
       <div className="text-center mb-8">
         <h3 className="text-4xl font-bold mb-4 text-foreground">
           {analysis.title}
@@ -71,9 +69,7 @@ export function MoodResults({ analysis }: MoodResultsProps) {
         </p>
       </div>
 
-      {/* Charts */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
-        {/* Charts Container */}
         <div className="xl:col-span-2">
           <Card className="shadow-2xl border-0 bg-card/90 backdrop-blur-md h-full">
             <CardHeader className="text-center pb-2">
@@ -83,7 +79,6 @@ export function MoodResults({ analysis }: MoodResultsProps) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-0 p-4">
-              {/* Bar Chart */}
               <div>
                 <ChartContainer config={chartConfig} className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
@@ -112,7 +107,6 @@ export function MoodResults({ analysis }: MoodResultsProps) {
                 </ChartContainer>
               </div>
 
-              {/* Pie Chart */}
               <div>
                 <ChartContainer config={chartConfig} className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
@@ -140,9 +134,7 @@ export function MoodResults({ analysis }: MoodResultsProps) {
           </Card>
         </div>
 
-        {/* Suggestions Sidebar */}
         <div className="space-y-4">
-          {/* Mood Intensity Bars */}
           <Card className="shadow-xl border-0 bg-card/90 backdrop-blur-md">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg">Mood Intensities</CardTitle>

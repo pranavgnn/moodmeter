@@ -24,6 +24,23 @@ export default function Home() {
   useEffect(() => {
     const token = localStorage.getItem("auth");
     setIsLoggedIn(!!token);
+
+    const handleStorageChange = () => {
+      const token = localStorage.getItem("auth");
+      setIsLoggedIn(!!token);
+    };
+
+    const handleAuthChange = () => {
+      const token = localStorage.getItem("auth");
+      setIsLoggedIn(!!token);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("auth-change", handleAuthChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("auth-change", handleAuthChange);
+    };
   }, []);
 
   const scrollToFeatures = () => {
@@ -35,7 +52,6 @@ export default function Home() {
     <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
       <Topbar />
 
-      {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-linear-to-r from-primary/5 via-transparent to-primary/5"></div>
         <div className="relative container mx-auto px-4 py-20 lg:py-32">
@@ -72,19 +88,19 @@ export default function Home() {
                   </Button>
                 </Link>
               ) : (
-                <Link to="/login">
+                <Link to="/signup">
                   <Button
                     size="lg"
-                    className="px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="px-10 py-6 text-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                   >
-                    Start Your Journey
+                    Get Started
                   </Button>
                 </Link>
               )}
               <Button
                 variant="outline"
                 size="lg"
-                className="px-8 py-4 text-lg"
+                className="px-10 py-6 text-xl"
                 onClick={scrollToFeatures}
               >
                 Learn More
@@ -93,12 +109,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Floating Elements */}
         <div className="absolute top-20 left-10 w-20 h-20 bg-primary/10 rounded-full blur-xl animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl animate-pulse delay-1000"></div>
       </section>
 
-      {/* Features Section */}
       <section id="features" className="py-20 lg:py-32">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -154,7 +168,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How It Works Section */}
       <section className="py-20 lg:py-32 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -203,7 +216,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-20 lg:py-32">
         <div className="container mx-auto px-4">
           <Card className="max-w-4xl mx-auto border-0 shadow-2xl bg-linear-to-r from-card to-card/80 backdrop-blur-sm">
@@ -225,10 +237,10 @@ export default function Home() {
                   </Button>
                 </Link>
               ) : (
-                <Link to="/login">
+                <Link to="/signup">
                   <Button
                     size="lg"
-                    className="px-12 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="px-14 py-6 text-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                   >
                     Get Started Now
                   </Button>
@@ -239,7 +251,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="py-8 border-t border-border/50">
         <div className="container mx-auto px-4">
           <div className="text-center">

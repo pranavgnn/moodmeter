@@ -14,14 +14,12 @@ export function PromptInput({
   onPromptChange,
   fetcher,
 }: PromptInputProps) {
-  // Use provided fetcher or create a new one
   const internalFetcher = useFetcher();
   const activeFetcher = fetcher || internalFetcher;
 
   return (
     <div className="flex items-center justify-center min-h-[70vh]">
       <div className="text-center max-w-4xl mx-auto px-4">
-        {/* Header */}
         <div className="mb-12">
           <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
             How are you feeling?
@@ -31,7 +29,6 @@ export function PromptInput({
           </p>
         </div>
 
-        {/* Input Form */}
         <Card className="border-0 shadow-lg bg-card/50 backdrop-blur-sm">
           <CardContent className="p-8">
             <activeFetcher.Form method="post" className="space-y-6">

@@ -40,10 +40,8 @@ export default function Prompt() {
   const navigate = useNavigate();
   const [prompt, setPrompt] = useState("");
 
-  // Handle fetcher response
   useEffect(() => {
     if (fetcher.data?.success && fetcher.data.analysis) {
-      // Navigate to results page with analysis data
       navigate("/result", { state: { analysis: fetcher.data.analysis } });
     } else if (fetcher.data?.error) {
       toast.error(fetcher.data.error);

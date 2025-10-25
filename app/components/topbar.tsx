@@ -13,19 +13,28 @@ export function Topbar() {
     const token = localStorage.getItem("auth");
     setIsLoggedIn(!!token);
 
-    // Listen for storage changes (in case login/logout happens in another tab)
     const handleStorageChange = () => {
       const token = localStorage.getItem("auth");
       setIsLoggedIn(!!token);
     };
 
+    const handleAuthChange = () => {
+      const token = localStorage.getItem("auth");
+      setIsLoggedIn(!!token);
+    };
+
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    window.addEventListener("auth-change", handleAuthChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("auth-change", handleAuthChange);
+    };
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("auth");
     setIsLoggedIn(false);
+    window.dispatchEvent(new CustomEvent("auth-change"));
     toast.success("Logged out successfully");
     navigate("/");
   };
@@ -34,7 +43,6 @@ export function Topbar() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo and Brand */}
           <div className="flex items-center space-x-4">
             <Link to="/" className="flex items-center space-x-3">
               <div className="relative">
@@ -51,7 +59,6 @@ export function Topbar() {
             </Link>
           </div>
 
-          {/* Actions */}
           <div className="flex items-center space-x-2">
             <ThemeToggle />
             {isLoggedIn ? (
@@ -65,16 +72,25 @@ export function Topbar() {
                 Logout
               </Button>
             ) : (
-              <Link to="/login">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 px-4 text-sm font-medium hover:bg-primary/10 hover:text-primary transition-all duration-200 rounded-lg"
-                >
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Login
-                </Button>
-              </Link>
+              <div className="flex items-center space-x-2">
+                <Link to="/login">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 px-4 text-sm font-medium hover:bg-primary/10 hover:text-primary transition-all duration-200 rounded-lg"
+                  >
+                    Login
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button
+                    size="sm"
+                    className="h-9 px-4 text-sm font-medium bg-primary hover:bg-primary/90 transition-all duration-200 rounded-lg"
+                  >
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
             )}
           </div>
         </div>

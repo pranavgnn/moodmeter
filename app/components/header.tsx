@@ -13,7 +13,6 @@ export function Header({ onLogout, isLoggedIn = false }: HeaderProps) {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo and Brand */}
           <div className="flex items-center space-x-4">
             <Link to="/" className="flex items-center space-x-3">
               <div className="relative">
@@ -30,7 +29,6 @@ export function Header({ onLogout, isLoggedIn = false }: HeaderProps) {
             </Link>
           </div>
 
-          {/* Actions */}
           <div className="flex items-center space-x-2">
             <ThemeToggle />
             {isLoggedIn ? (

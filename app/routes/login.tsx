@@ -11,25 +11,64 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import jwt from "jsonwebtoken";
+import { supabase } from "~/lib/supabase";
 import { toast } from "sonner";
-
-const JWT_SECRET = import.meta.env.VITE_JWT_SECRET;
-
-if (!JWT_SECRET) {
-  throw new Error("VITE_JWT_SECRET environment variable is required");
-}
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
   const username = formData.get("username") as string;
   const password = formData.get("password") as string;
 
-  if (username === "test" && password === "test") {
-    const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "1h" });
-    return { success: true, token };
-  } else {
-    return { error: "Invalid username or password" };
+  if (!username?.trim() || !password?.trim()) {
+    return { error: "Username and password are required" };
+  }
+
+  try {
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("username", username.trim())
+      .single();
+
+    if (profileError || !profile) {
+      return { error: "Invalid username or password" };
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: profile.email,
+      password,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    if (data.user) {
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", data.user.id)
+        .single();
+
+      if (profileError) {
+        console.error("Profile fetch error:", profileError);
+      }
+
+      return {
+        success: true,
+        token: data.session?.access_token,
+        user: {
+          id: data.user.id,
+          email: data.user.email,
+          username: profile?.username || data.user.user_metadata?.username,
+        },
+      };
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+    return {
+      error: error instanceof Error ? error.message : "Failed to log in",
+    };
   }
 }
 
@@ -38,7 +77,6 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect to prompt if already logged in
     const token = localStorage.getItem("auth");
     if (token) {
       navigate("/prompt");
@@ -86,6 +124,22 @@ export default function Login() {
               {fetcher.state === "submitting" ? "Logging in..." : "Login"}
             </Button>
           </fetcher.Form>
+          <div className="mt-4 text-center space-y-2">
+            <p className="text-sm text-muted-foreground">
+              <a
+                href="/forgot-password"
+                className="text-primary hover:underline"
+              >
+                Forgot Password?
+              </a>
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Don't have an account?{" "}
+              <a href="/signup" className="text-primary hover:underline">
+                Sign up
+              </a>
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
