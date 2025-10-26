@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   username TEXT UNIQUE NOT NULL,
   email TEXT NOT NULL,
+  email_verified BOOLEAN DEFAULT FALSE NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
@@ -28,11 +29,12 @@ CREATE POLICY "Users can insert own profile" ON profiles
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, username, email)
+  INSERT INTO public.profiles (id, username, email, email_verified)
   VALUES (
     NEW.id,
     NEW.raw_user_meta_data->>'username',
-    NEW.email
+    NEW.email,
+    FALSE
   );
   RETURN NEW;
 END;
