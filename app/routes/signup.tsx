@@ -30,7 +30,6 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   try {
-    // Check username availability
     const { data: existingUser, error: checkError } = await supabase
       .from("profiles")
       .select("username")
@@ -45,7 +44,6 @@ export async function action({ request }: Route.ActionArgs) {
       return { error: "Username is already taken" };
     }
 
-    // Check email availability
     const { data: existingEmail, error: emailCheckError } = await supabase
       .from("profiles")
       .select("email")
@@ -117,13 +115,11 @@ export default function Signup() {
         .single();
 
       if (error && error.code !== "PGRST116") {
-        console.error("Username check error:", error);
         setIsUsernameAvailable(null);
         setIsCheckingUsername(false);
         return;
       }
 
-      // Only update state if this is still the current username being checked
       setUsername((currentUsername) => {
         if (currentUsername.trim() === usernameToCheck.trim()) {
           setIsUsernameAvailable(!data);
@@ -132,7 +128,6 @@ export default function Signup() {
         return currentUsername;
       });
     } catch (error) {
-      console.error("Username check error:", error);
       setIsUsernameAvailable(null);
       setIsCheckingUsername(false);
     }
@@ -145,7 +140,6 @@ export default function Signup() {
       clearTimeout(usernameCheckTimeout);
     }
 
-    // Clear previous state immediately when user starts typing
     if (!value.trim()) {
       setIsUsernameAvailable(null);
       setIsCheckingUsername(false);

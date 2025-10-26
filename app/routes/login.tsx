@@ -35,7 +35,6 @@ export async function action({ request }: Route.ActionArgs) {
       return { error: "Invalid username or password" };
     }
 
-    // Check if email is verified before attempting login
     if (!profile.email_verified) {
       return {
         error: "Please verify your email before logging in",
@@ -118,17 +117,14 @@ export default function Login() {
 
       if (error) {
         toast.error("Failed to resend verification email");
-        console.error("Resend error:", error);
       } else {
         toast.success("Verification email sent! Check your inbox.");
       }
     } catch (error) {
       toast.error("Failed to resend verification email");
-      console.error("Resend error:", error);
     }
   };
 
-  // Show verification screen if user needs to verify email
   if (fetcher.data?.needsVerification) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-background to-muted/20 p-4">

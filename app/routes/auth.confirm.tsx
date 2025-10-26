@@ -20,28 +20,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const type = searchParams.get("type");
   const next = searchParams.get("next") || "/";
 
-  console.log("Auth confirm loader called with:", {
-    code: !!code,
-    token_hash: !!token_hash,
-    type,
-    next,
-  });
-
-  // Check for error parameters in URL hash
   const url = new URL(request.url);
-  const hash = url.hash.substring(1); // Remove the '#'
+  const hash = url.hash.substring(1);
   const errorParams = new URLSearchParams(hash);
   const error = errorParams.get("error");
   const errorCode = errorParams.get("error_code");
   const errorDescription = errorParams.get("error_description");
 
-  // If there are error parameters, return error data
   if (error) {
-    console.log("Error parameters found:", {
-      error,
-      errorCode,
-      errorDescription,
-    });
     return {
       success: false,
       error: errorDescription || "Verification failed",
@@ -65,57 +51,35 @@ export async function loader({ request }: LoaderFunctionArgs) {
               }) || []
           );
         },
-        setAll(cookies: { name: string; value: string; options: any }[]) {
-          // This is a server-side loader, so we can't set cookies here
-          // The client will handle the session
-        },
+        setAll(cookies: { name: string; value: string; options: any }[]) {},
       },
     }
   );
 
   if (code) {
-    // Handle PKCE flow (signup/login)
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       return redirect(next);
     }
   } else if (token_hash && type) {
-    console.log("Processing OTP verification with type:", type);
-    // Handle OTP flow (password reset, email confirmation)
     const { error } = await supabase.auth.verifyOtp({
       token_hash,
       type: type as any,
     });
-    console.log("OTP verification result:", {
-      error: !!error,
-      errorMessage: error?.message,
-    });
 
     if (!error) {
-      console.log("OTP verification successful, processing profile update");
-      // If this is an email confirmation, update the profile to mark email as verified
       if (type === "email") {
         const {
           data: { user },
         } = await supabase.auth.getUser();
-        console.log("Got user:", { userId: user?.id, userEmail: user?.email });
 
         if (user) {
-          // Try to update the profile, but don't fail if it doesn't exist yet
           const { error: profileError } = await supabase
             .from("profiles")
             .update({ email_verified: true })
             .eq("id", user.id);
 
-          console.log("Profile update result:", {
-            error: !!profileError,
-            errorCode: profileError?.code,
-            errorMessage: profileError?.message,
-          });
-
-          // If profile doesn't exist, try to insert it
           if (profileError && profileError.code === "PGRST116") {
-            console.log("Profile not found, attempting to create it");
             const { error: insertError } = await supabase
               .from("profiles")
               .insert({
@@ -124,25 +88,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
                 email: user.email || "",
                 email_verified: true,
               });
-
-            console.log("Profile insert result:", {
-              error: !!insertError,
-              errorMessage: insertError?.message,
-            });
           } else if (profileError) {
             console.error("Failed to update profile:", profileError);
           }
         }
       }
-      // Return success data instead of redirecting
-      console.log("Returning success response");
       return { success: true, type, next };
-    } else {
-      console.error("OTP verification failed:", error);
     }
   }
 
-  // If there's an error, return error data
   return { success: false, error: "Verification failed" };
 }
 
@@ -150,10 +104,8 @@ export default function AuthConfirm() {
   const data = useLoaderData<typeof loader>();
   const navigate = useNavigate();
 
-  // Clean up URL hash if there are error parameters
   useEffect(() => {
     if (!data.success && window.location.hash) {
-      // Remove error parameters from URL
       window.history.replaceState(
         null,
         "",
