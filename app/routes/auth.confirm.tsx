@@ -15,13 +15,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
     {
       cookies: {
         getAll() {
-          return request.headers
-            .get("cookie")
-            ?.split(";")
-            .map((c) => {
-              const [name, value] = c.trim().split("=");
-              return { name, value };
-            }) || [];
+          return (
+            request.headers
+              .get("cookie")
+              ?.split(";")
+              .map((c) => {
+                const [name, value] = c.trim().split("=");
+                return { name, value };
+              }) || []
+          );
         },
         setAll(cookies: { name: string; value: string; options: any }[]) {
           // This is a server-side loader, so we can't set cookies here

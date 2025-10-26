@@ -30,6 +30,7 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   try {
+    // Check username availability
     const { data: existingUser, error: checkError } = await supabase
       .from("profiles")
       .select("username")
@@ -42,6 +43,21 @@ export async function action({ request }: Route.ActionArgs) {
 
     if (existingUser) {
       return { error: "Username is already taken" };
+    }
+
+    // Check email availability
+    const { data: existingEmail, error: emailCheckError } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("email", email.trim())
+      .single();
+
+    if (emailCheckError && emailCheckError.code !== "PGRST116") {
+      throw emailCheckError;
+    }
+
+    if (existingEmail) {
+      return { error: "Email is already registered" };
     }
 
     const { data, error } = await supabase.auth.signUp({
@@ -61,7 +77,8 @@ export async function action({ request }: Route.ActionArgs) {
 
     return {
       success: true,
-      message: "Account created successfully! Please check your email to verify your account.",
+      message:
+        "Account created successfully! Please check your email to verify your account.",
     };
   } catch (error) {
     console.error("Signup error:", error);
@@ -107,7 +124,7 @@ export default function Signup() {
       }
 
       // Only update state if this is still the current username being checked
-      setUsername(currentUsername => {
+      setUsername((currentUsername) => {
         if (currentUsername.trim() === usernameToCheck.trim()) {
           setIsUsernameAvailable(!data);
           setIsCheckingUsername(false);
@@ -242,7 +259,9 @@ export default function Signup() {
               type="submit"
               className="w-full"
               disabled={
-                fetcher.state === "submitting" || isUsernameAvailable === false
+                fetcher.state === "submitting" ||
+                isUsernameAvailable === false ||
+                isCheckingUsername
               }
             >
               {fetcher.state === "submitting"
